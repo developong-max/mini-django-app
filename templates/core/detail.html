@@ -1,0 +1,87 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ deployment.hostname }} — Deployment Detail{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div style="margin-bottom: 1.5rem;">
+        <a href="{% url 'index' %}" class="btn btn-sm" style="background: var(--light); color: var(--secondary);">← Back to Dashboard</a>
+    </div>
+
+    <h1 style="font-size: 1.875rem; font-weight: 700; margin-bottom: 0.5rem;">
+        {{ deployment.hostname }}
+    </h1>
+    <p style="color: var(--secondary); margin-bottom: 2rem;">
+        Deployment record #{{ deployment.id }} — {{ deployment.time_of_deployment|date:"F j, Y H:i:s" }}
+    </p>
+
+    <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="metric-card">
+            <div class="metric-label">Server IP</div>
+            <div class="metric-value" style="font-size: 1.125rem;">{{ deployment.server_ip }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Environment</div>
+            <div class="metric-value" style="font-size: 1rem;">
+                {% if deployment.deployment_environment == 'development' %}
+                    <span class="badge badge-dev">Development</span>
+                {% elif deployment.deployment_environment == 'staging' %}
+                    <span class="badge badge-staging">Staging</span>
+                {% elif deployment.deployment_environment == 'production' %}
+                    <span class="badge badge-prod">Production</span>
+                {% elif deployment.deployment_environment == 'testing' %}
+                    <span class="badge badge-test">Testing</span>
+                {% else %}
+                    <span class="badge badge-dr">DR</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">NGINX Port</div>
+            <div class="metric-value">{{ deployment.nginx_port }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Node Role</div>
+            <div class="metric-value" style="font-size: 1rem;">
+                {% if deployment.node_role == 'primary' %}
+                    <span class="badge badge-primary">Primary</span>
+                {% else %}
+                    <span class="badge badge-secondary">Secondary</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Gunicorn Workers</div>
+            <div class="metric-value">{{ deployment.gunicorn_workers }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Gunicorn Port</div>
+            <div class="metric-value">{{ deployment.gunicorn_port }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">OS Version</div>
+            <div class="metric-value" style="font-size: 0.875rem;">{{ deployment.os_version|default:"N/A" }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Python Version</div>
+            <div class="metric-value" style="font-size: 0.875rem;">{{ deployment.python_version|default:"N/A" }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Django Version</div>
+            <div class="metric-value" style="font-size: 0.875rem;">{{ deployment.django_version|default:"N/A" }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Database Host</div>
+            <div class="metric-value" style="font-size: 0.875rem;">{{ deployment.db_host|default:"N/A" }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Replication Status</div>
+            <div class="metric-value" style="font-size: 0.875rem;">{{ deployment.db_replica_status }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Client IP</div>
+            <div class="metric-value" style="font-size: 0.875rem;">{{ deployment.request_source_ip|default:"N/A" }}</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

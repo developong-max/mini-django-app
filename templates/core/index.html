@@ -1,0 +1,188 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard — InfraTester{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Page Header -->
+    <div style="margin-bottom: 2rem;">
+        <h1 style="font-size: 1.875rem; font-weight: 700; color: var(--dark); margin-bottom: 0.5rem;">
+            Infrastructure Dashboard
+        </h1>
+        <p style="color: var(--secondary); font-size: 0.875rem;">
+            Real-time deployment monitoring and system health validation
+        </p>
+    </div>
+
+    <!-- Request Flow Diagram -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+            <span class="card-title">🔀 Request Flow Architecture</span>
+            <span class="badge badge-primary">Live</span>
+        </div>
+        <div class="card-body">
+            <div class="flow-diagram">
+                <div>
+                    <div class="flow-node">🌐 Client<br><span class="flow-label">Browser</span></div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div>
+                    <div class="flow-node active">🔒 NGINX<br><span class="flow-label">Port 4443 SSL</span></div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div>
+                    <div class="flow-node">🦄 Gunicorn<br><span class="flow-label">WSGI Server</span></div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div>
+                    <div class="flow-node">🐍 Django<br><span class="flow-label">Application</span></div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div>
+                    <div class="flow-node">🗄️ PostgreSQL<br><span class="flow-label">Primary/Replica</span></div>
+                </div>
+            </div>
+            <p style="text-align: center; color: var(--secondary); font-size: 0.75rem; margin-top: 0.5rem;">
+                Current request handled by: <strong style="color: var(--primary);">{{ system_info.handled_by }}</strong> | 
+                Load balancing: <strong>Least Connections</strong>
+            </p>
+        </div>
+    </div>
+
+    <!-- System Metrics -->
+    <div class="metrics-grid">
+        <div class="metric-card success">
+            <div class="metric-label">Hostname</div>
+            <div class="metric-value" style="font-size: 1.125rem;">{{ system_info.hostname }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Server IP</div>
+            <div class="metric-value">{{ system_info.server_ip }}</div>
+        </div>
+        <div class="metric-card warning">
+            <div class="metric-label">NGINX Port</div>
+            <div class="metric-value">{{ system_info.nginx_port }}</div>
+        </div>
+        <div class="metric-card success">
+            <div class="metric-label">Database</div>
+            <div class="metric-value" style="font-size: 1rem;">{{ system_info.db_host }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Platform</div>
+            <div class="metric-value" style="font-size: 0.875rem;">{{ system_info.platform }}</div>
+        </div>
+        <div class="metric-card success">
+            <div class="metric-label">Replication Status</div>
+            <div class="metric-value" style="font-size: 0.875rem;">{{ system_info.db_replica_status }}</div>
+        </div>
+    </div>
+
+    <!-- Deployment Records -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">📋 Deployment Records</span>
+            <span class="badge badge-primary">{{ total_deployments }} total</span>
+        </div>
+        <div class="card-body">
+            {% if deployments %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hostname</th>
+                            <th>IP Address</th>
+                            <th>Environment</th>
+                            <th>NGINX Port</th>
+                            <th>Deployed</th>
+                            <th>Role</th>
+                            <th>DB Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in deployments %}
+                        <tr>
+                            <td><strong>{{ d.hostname }}</strong></td>
+                            <td><code style="background: var(--light); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">{{ d.server_ip }}</code></td>
+                            <td>
+                                {% if d.deployment_environment == 'development' %}
+                                    <span class="badge badge-dev">Development</span>
+                                {% elif d.deployment_environment == 'staging' %}
+                                    <span class="badge badge-staging">Staging</span>
+                                {% elif d.deployment_environment == 'production' %}
+                                    <span class="badge badge-prod">Production</span>
+                                {% elif d.deployment_environment == 'testing' %}
+                                    <span class="badge badge-test">Testing</span>
+                                {% else %}
+                                    <span class="badge badge-dr">DR</span>
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ d.nginx_port }}</strong></td>
+                            <td>{{ d.time_of_deployment|date:"Y-m-d H:i" }}</td>
+                            <td>
+                                {% if d.node_role == 'primary' %}
+                                    <span class="badge badge-primary">Primary</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">Secondary</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if 'primary' in d.db_replica_status %}
+                                    <span class="badge badge-primary">{{ d.db_replica_status }}</span>
+                                {% elif 'replica' in d.db_replica_status %}
+                                    <span class="badge badge-replica">{{ d.db_replica_status }}</span>
+                                {% else %}
+                                    <span class="badge badge-test">{{ d.db_replica_status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'deployment_detail' d.pk %}" class="btn btn-primary btn-sm">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 3rem; color: var(--secondary);">
+                <p style="font-size: 3rem; margin-bottom: 1rem;">📭</p>
+                <p>No deployment records yet.</p>
+                <p style="font-size: 0.875rem; margin-top: 0.5rem;">
+                    Use the API to create records: <code>POST /api/deployment/create/</code>
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- API Endpoints Reference -->
+    <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">
+            <span class="card-title">🔌 API Endpoints</span>
+            <span class="badge badge-test">Reference</span>
+        </div>
+        <div class="card-body">
+            <div class="code-block">
+<span class="comment"># Health Check — Load Balancer Monitoring</span>
+GET /api/health/
+<span class="comment"># Response: {"status": "healthy", "database": "healthy", "hostname": "...", "timestamp": "..."}</span>
+
+<span class="comment"># List All Deployments</span>
+GET /api/deployments/
+
+<span class="comment"># Create Deployment Record</span>
+POST /api/deployment/create/
+Content-Type: application/json
+
+{
+    <span class="string">"hostname"</span>: <span class="string">"app1-node"</span>,
+    <span class="string">"server_ip"</span>: <span class="string">"192.168.56.11"</span>,
+    <span class="string">"deployment_environment"</span>: <span class="string">"production"</span>,
+    <span class="string">"nginx_port"</span>: <span class="number">4443</span>,
+    <span class="string">"node_role"</span>: <span class="string">"primary"</span>
+}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
