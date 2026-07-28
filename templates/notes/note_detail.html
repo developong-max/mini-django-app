@@ -1,0 +1,14 @@
+{% extends "notes/base.html" %}
+{% block title %}{{ note.title }}{% endblock %}
+{% block content %}
+    <div class="card">
+        <h2>{{ note.title }}</h2>
+        <p style="white-space: pre-wrap;">{{ note.content }}</p>
+        <div class="meta">
+            Created {{ note.created_at|date:"d M Y, H:i" }} &middot;
+            Last updated {{ note.updated_at|date:"d M Y, H:i" }}
+        </div>
+    </div>
+    <a class="button" href="{% url 'note_list' %}">&larr; Back to notes</a>
+    <a class="button danger" href="{% url 'note_delete' note.pk %}">Delete</a>
+{% endblock %}

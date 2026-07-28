@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Notes{% endblock %}</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; background: #f7fafc; color: #1a202c; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        header h1 { font-size: 22px; margin: 0; }
+        header a.button, .button { background: #4299e1; color: white; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 14px; }
+        header a.button:hover, .button:hover { background: #3182ce; }
+        .card { background: white; border-radius: 8px; padding: 16px 20px; margin-bottom: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+        .card a { text-decoration: none; color: #2b6cb0; font-weight: bold; }
+        .meta { color: #718096; font-size: 13px; margin-top: 4px; }
+        .messages { list-style: none; padding: 0; }
+        .messages li { background: #c6f6d5; color: #22543d; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; }
+        form input[type=text], form textarea { width: 100%; padding: 8px; margin-bottom: 12px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
+        .danger { background: #e53e3e; }
+        .danger:hover { background: #c53030; }
+        .empty { color: #718096; text-align: center; padding: 40px 0; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="{% url 'note_list' %}" style="text-decoration:none; color:inherit;">📝 Notes</a></h1>
+        <a class="button" href="{% url 'note_create' %}">+ New note</a>
+    </header>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</body>
+</html>
