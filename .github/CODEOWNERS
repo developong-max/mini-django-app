@@ -1,0 +1,8 @@
+# Default owner for everything in the repo
+*                       @developong-max
+
+# App logic requires the lead developer's review
+/notes/                 @developong-max
+
+# Settings and security-sensitive config require extra scrutiny
+/notes_project/settings.py   @developong-max
