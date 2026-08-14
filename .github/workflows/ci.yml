@@ -1,4 +1,4 @@
-on:
+        on:
   pull_request:
     branches: [main]
   push:
@@ -42,3 +42,20 @@ jobs:
 
       - name: Run Bandit scan
         run: bandit -r . -x ./venv,./migrations
+
+  dependency-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Audit dependencies
+        run: pip-audit -r requirements.txt
